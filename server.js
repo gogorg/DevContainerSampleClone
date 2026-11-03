@@ -8,7 +8,26 @@ const PORT = 3000;
 const staticPath = path.join(__dirname);
 
 const server = http.createServer((req, res) => {
-    let filePath = path.join(staticPath, req.url === '/' ? 'index.html' : req.url);
+    const requestUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    let requestPath;
+
+    try {
+        requestPath = decodeURIComponent(requestUrl.pathname);
+    } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'text/plain' });
+        res.end('Bad Request');
+        return;
+    }
+
+    const requestedResource = requestPath === '/' ? 'index.html' : requestPath;
+    const filePath = path.resolve(staticPath, `.${requestedResource}`);
+
+    if (filePath !== staticPath && !filePath.startsWith(staticPath + path.sep)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+    }
+
     const extname = path.extname(filePath);
     let contentType = 'text/html';
 
