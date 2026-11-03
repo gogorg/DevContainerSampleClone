@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const testBlq = require('./testBlq');
 
 const PORT = 3000;
 
